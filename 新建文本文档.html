@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>评价反馈</title>
+  <style>
+    body {
+      background-image: url('https://s1.wzznft.com/i/2023/10/17/tsl88t.jpg'); /* 设置背景图片的路径 */
+      background-size: cover; /* 自适应屏幕大小 */
+      background-repeat: no-repeat; /* 防止图片重复 */
+      background-attachment: fixed; /* 保持图片固定，不滚动 */
+    }
+    .rounded-input {
+      border: none;
+      border-radius: 10px; /* 圆润的角 */
+      background-color: rgba(255, 236, 139, 0.8); /* 半透明淡黄色背景 */
+      width: 60%; /* 限制宽度为80%屏幕宽度 */
+      padding: 10px;
+    }
+    .custom-button {
+      background-color: rgba(255, 236, 139, 0.8); /* 半透明淡黄色背景 */
+      color: black;
+      border: none;
+      border-radius: 10px; /* 圆润的角 */
+      font-size: 20px;
+      padding: 10px 20px;
+    }
+    .input-container {
+      margin-bottom: 10px;
+    }
+    .label-container {
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <h1>评价反馈</h1>
+  
+  <form id="feedbackForm">
+    <div class="input-container">
+      <div class="label-container">
+        <label for="feedback">请输入您的反馈：</label>
+      </div>
+      <textarea id="feedback" class="rounded-input" rows="5" cols="50"></textarea>
+    </div>
+
+    <div class="input-container">
+      <input type="submit" value="发送" class="custom-button">
+    </div>
+   
+    <div class="input-container">
+      <div class="label-container">
+        <label for="reply">客服回复：</label>
+      </div>
+      <textarea id "reply" class="rounded-input" rows="5" cols="50" readonly></textarea>
+    </div>
+    
+  </form>
+  
+  <script>
+    document.getElementById("feedbackForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      var feedback = document.getElementById("feedback").value;
+      var reply = document.getElementById("reply").value;
+      // 在此处可以将反馈和回复信息发送到服务器进行处理
+      
+      // 模拟客服回复
+      reply += "\n客服回复: 感谢您的反馈!";
+      
+      document.getElementById("reply").value = reply;
+      document.getElementById("feedback").value = "";
+    });
+  </script>
+</body>
+</html>
+
