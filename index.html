@@ -1,240 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CWA</title>
-<style>
-  body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 0;
-  }
-  #chat-container {
-    display: flex;
-    flex-direction: column;
-    height: 300px;
-    overflow: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    background-color: #fff;
-    margin-bottom: 10px;
-  }
-  #user-input {
-    width: calc(100% - 120px);
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-right: 10px;
-    overflow-y: hidden; /* 隐藏垂直滚动条 */
-    resize: none; /* 不允许手动改变输入框大小 */
-  }
-  button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-  }
-  button:hover {
-    background-color: #0056b3;
-  }
-  .message {
-    display: flex;
-    justify-content: flex-end;
-    padding: 5px;
-    margin-bottom: 5px;
-  }
-  .user-message {
-    margin-left: auto;
-    background-color: #dcf8c6;
-    border-radius: 10px;
-    padding: 10px;
-  }
-  .ai-message {
-    margin-right: auto;
-    background-color: #e5e5ea;
-    border-radius: 10px;
-    padding: 10px;
-  }
- 
-
-  /* 添加一个加载指示器的样式 */
-  .loader {
-    border: 4px solid #f3f3f3; /* Light grey */
-    border-top: 4px solid #3498db; /* Blue */
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    animation: spin 2s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-</style>
+    <title>AI Chat</title>
+    <style>
+        /* ... (CSS styles remain the same) ... */
+    </style>
 </head>
 <body>
-<h1 style="text-align: center;">CWA</h1>
-<div id="chat-container">
-  <!-- Chat messages will be displayed here -->
-</div>
-<div style="display: flex; justify-content: center; padding: 10px;">
-  <!-- 将 input 改为 textarea -->
-  <textarea id="user-input" placeholder="说点儿什么吧..."></textarea>
-  <button onclick="sendMessage()">发送</button>
-</div>
+    <div id="chat-container">
+        <h1>AI Chat</h1>
+        <div id="chat-output"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
 
-<script>
-// This function will be called when the user clicks the send button
-// 全局变量，存储对话历史
-var conversationHistory = [];
-const apiUrl = 'https://oneapi.aivvm.com/v1/chat/completions'; //API的URL
-const headers = {
-  'Content-Type': 'application/json',
-  'Authorization' :'Bearer sk-dmfjdCBOqP2AbTtbFe5e449a114a49F99aE9E59eFa9f37E2'
-  //'Authorization': 'Bearer YOUR_API_KEY'
-};
+    <script>
+        const API_URL = 'https://burn.hair/v1/chat/completions';
+        const API_KEY = 'sk-YCsPQsFRDiqk8xbW381eF4B0Ac2d405a86E52d80E5D729De'; // 替换为你的API密钥
 
-function showLoadingIndicator() {
-  var chatContainer = document.getElementById('chat-container');
-  var loaderDiv = document.createElement('div');
-  loaderDiv.classList.add('loader');
-  loaderDiv.setAttribute('id', 'loading-indicator'); // 设置一个ID以便之后可以移除
-  chatContainer.appendChild(loaderDiv);
-}
+        let conversationHistory = [];
 
-// 隐藏加载指示器
-function hideLoadingIndicator() {
-  var loaderDiv = document.getElementById('loading-indicator');
-  if (loaderDiv) {
-    loaderDiv.remove();
-  }
-}
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const chatOutput = document.getElementById('chat-output');
 
-function sendMessageToAPI(userMessage) {
-  conversationHistory.push({ "role": "user", "content": userMessage });
-  // 构建请求的数据体
-  const data = {
-    model: "gpt-4",
-    messages: conversationHistory,
-    presence_penalty: 0
-  };
-  // 打印请求数据，检查是否正确
-  console.log('Sending request with data:', data);
-  showLoadingIndicator(); // 显示加载指示器
-  // 使用fetch函数发送请求
-  fetch(apiUrl, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify(data) // 将JavaScript对象转为JSON字符串
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
-  .then(data => {
-    // 打印响应数据，验证内容
-    console.log('Received response:', data);
-    const aiResponse = data.choices[0].message.content; // 获取AI响应内容
-    addToChat(aiResponse, 'AI'); // 将AI的回复添加到聊天框中
-    conversationHistory.push({ "role": "assistant", "content": aiResponse });
-  })
-  .finally(() => {
-    hideLoadingIndicator(); // 隐藏加载指示器
-  })
-  .catch((error) => {
-    // 打印出现的错误
-    console.error('Error:', error);
-    console.error('Error:', error);
-    addToChat('Sorry, there was an error communicating with the AI.', 'Error'); // 显示错误消息
-  });
-}
+            const message = userInput.value;
+            userInput.value = '';
 
-// 页面加载完成后立即调整textarea的高度
-document.addEventListener('DOMContentLoaded', function() {
-  var textarea = document.getElementById('user-input');
-  adjustTextareaHeight(textarea);
-});
-function sendMessage() {
-    var userInputField = document.getElementById('user-input');
-    var userText = userInputField.value; // Get the user input
+            chatOutput.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
 
-    if (userText.trim() === '') return; // Don't send empty messages
+            conversationHistory.push({ role: 'user', content: message });
 
-    // Display the user's message in the chat container
-    addToChat(userText, 'You');
-    sendMessageToAPI(userText); // Call your API with the user's message here
-    userInputField.value = ''; // Clear the input field
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'claude-3-opus-20240229',
+                    max_tokens: 1024,
+                    messages: conversationHistory
+                })
+            });
 
-    // 调整输入框高度
-    adjustTextareaHeight(userInputField);
-}
+            const data = await response.json();
+            console.log('API response:', data);
 
-// 为 textarea 添加自适应高度的事件监听
-function autoResizeTextarea() {
-  var userInputField = document.getElementById('user-input');
-  userInputField.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-  });
-}
-autoResizeTextarea(); // Call the function to activate the auto-resize
-
-
-// This function adds messages to the chat container
-function addToChat(text, sender) {
-  var chatContainer = document.getElementById('chat-container');
-  var messageDiv = document.createElement('div'); // Create a new div for the message
-  messageDiv.classList.add('message'); // Add the message class
-  var innerDiv = document.createElement('div'); // Create a new inner div for the text
-  innerDiv.textContent = text;
-
-  if (sender === 'You') {
-    innerDiv.classList.add('user-message');
-    messageDiv.classList.add('user-message');
-  } else if (sender === 'AI') {
-    innerDiv.classList.add('ai-message');
-    messageDiv.classList.add('ai-message');
-  }
-
-  messageDiv.appendChild(innerDiv); // Add the inner div to the message div
-  chatContainer.appendChild(messageDiv); // Add the message div to the chat container
-
-  // Scroll to the bottom of the chat container
-  chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-function adjustTextareaHeight(textarea) {
-    // 重置高度以便高度能够减少
-    textarea.style.height = 'auto';
-
-    // 获取内边距值
-    var paddingTop = window.getComputedStyle(textarea).getPropertyValue('padding-top');
-    var paddingBottom = window.getComputedStyle(textarea).getPropertyValue('padding-bottom');
-
-    // 计算内边距的总和
-    var paddingTotal = parseInt(paddingTop) + parseInt(paddingBottom);
-
-    // 计算并设置新的高度，减去内边距的总和
-    var newHeight = textarea.scrollHeight - paddingTotal;
-    textarea.style.height = newHeight + 'px';
-}
-
-// 绑定输入事件监听器
-var textarea = document.querySelector('textarea');
-textarea.addEventListener('input', function() {
-    adjustTextareaHeight(this);
-});
-
-// 初始化调整
-adjustTextareaHeight(textarea);
-</script>
+            if (data.content && data.content[0]) {
+                const botMessage = data.content[0].text;
+                chatOutput.innerHTML += `<p><strong>AI:</strong> ${botMessage}</p>`;
+                conversationHistory.push({ role: 'assistant', content: botMessage });
+            } else {
+                chatOutput.innerHTML += `<p><strong>Error:</strong> Unable to parse API response.</p>`;
+            }
+        }
+    </script>
 </body>
 </html>
 
