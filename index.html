@@ -1,61 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>AI Chat</title>
-    <style>
-        /* ... (CSS styles remain the same) ... */
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伤害计算器</title>
 </head>
 <body>
-    <div id="chat-container">
-        <h1>AI Chat</h1>
-        <div id="chat-output"></div>
-        <input type="text" id="user-input" placeholder="Type your message...">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-
+    <h1>伤害计算器</h1>
+    <form id="damageForm">
+        <label for="attackPower">攻击力:</label>
+        <input type="number" id="attackPower" name="attackPower" value="7754"><br><br>
+        
+        <label for="rate">倍率:</label>
+        <input type="number" step="0.01" id="rate" name="rate" value="1.29"><br><br>
+        
+        <label for="critChance">暴击率:</label>
+        <input type="number" step="0.01" id="critChance" name="critChance" value="1"><br><br>
+        
+        <label for="critDamage">暴击伤害:</label>
+        <input type="number" id="critDamage" name="critDamage" value="6"><br><br>
+        
+        <label for="increasedDamage">增伤:</label>
+        <input type="number" step="0.001" id="increasedDamage" name="increasedDamage" value="2.152"><br><br>
+        
+        <label for="vulnerability">易伤:</label>
+        <input type="number" step="0.01" id="vulnerability" name="vulnerability" value="0"><br><br>
+        
+        <label for="penetration">穿透:</label>
+        <input type="number" step="0.01" id="penetration" name="penetration" value="0.51"><br><br>
+        
+        <label for="defenseReduction">减防:</label>
+        <input type="number" step="0.01" id="defenseReduction" name="defenseReduction" value="0.2"><br><br>
+        
+        <input type="button" value="计算总伤害" onclick="calculateTotalDamage()">
+    </form>
+    
+    <h2>总伤害: <span id="totalDamage">159536.98</span></h2>
+    
     <script>
-        const API_URL = 'https://burn.hair/v1/chat/completions';
-        const API_KEY = 'sk-YCsPQsFRDiqk8xbW381eF4B0Ac2d405a86E52d80E5D729De'; // 替换为你的API密钥
+        function calculateDamage(attackPower, rate, critChance, critDamage, increasedDamage, vulnerability, penetration, defenseReduction) {
+            const attackZone = attackPower; // 攻击力
+            const rateZone = rate; // 倍率
+            const critZone = 1 + critChance * critDamage; // 暴击区
+            const increaseZone = 1 + increasedDamage; // 增伤区
+            const vulnerabilityZone = 1 + vulnerability; // 易伤区
+            const resistanceZone = 1 + penetration; // 抗性区
+            const defenseZone = 1000 / (1000 + 1100 * (1 - Math.min(defenseReduction, 1))); // 防御区，防止 defenseReduction >= 1 时除以 0
+            const tenacityZone = 0.9; // 韧性区固定为0.9
 
-        let conversationHistory = [];
+            // 计算总伤害
+            let totalDamage = attackZone * rateZone * critZone * increaseZone * vulnerabilityZone * resistanceZone * defenseZone * tenacityZone;
+            return totalDamage;
+        }
 
-        async function sendMessage() {
-            const userInput = document.getElementById('user-input');
-            const chatOutput = document.getElementById('chat-output');
+        function calculateTotalDamage() {
+            const attackPower = parseFloat(document.getElementById('attackPower').value);
+            const rate = parseFloat(document.getElementById('rate').value);
+            const critChance = parseFloat(document.getElementById('critChance').value);
+            const critDamage = parseFloat(document.getElementById('critDamage').value);
+            const increasedDamage = parseFloat(document.getElementById('increasedDamage').value);
+            const vulnerability = parseFloat(document.getElementById('vulnerability').value);
+            const penetration = parseFloat(document.getElementById('penetration').value);
+            const defenseReduction = parseFloat(document.getElementById('defenseReduction').value);
 
-            const message = userInput.value;
-            userInput.value = '';
-
-            chatOutput.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
-
-            conversationHistory.push({ role: 'user', content: message });
-
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_KEY}`
-                },
-                body: JSON.stringify({
-                    model: 'claude-3-opus-20240229',
-                    max_tokens: 1024,
-                    messages: conversationHistory
-                })
-            });
-
-            const data = await response.json();
-            console.log('API response:', data);
-
-            if (data.content && data.content[0]) {
-                const botMessage = data.content[0].text;
-                chatOutput.innerHTML += `<p><strong>AI:</strong> ${botMessage}</p>`;
-                conversationHistory.push({ role: 'assistant', content: botMessage });
-            } else {
-                chatOutput.innerHTML += `<p><strong>Error:</strong> Unable to parse API response.</p>`;
-            }
+            const totalDamage = calculateDamage(attackPower, rate, critChance, critDamage, increasedDamage, vulnerability, penetration, defenseReduction);
+            document.getElementById('totalDamage').innerText = totalDamage.toFixed(2);
         }
     </script>
 </body>
 </html>
+
 
